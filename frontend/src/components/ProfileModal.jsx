@@ -355,116 +355,130 @@ const ProfileModal = ({ isOpen, onClose }) => {
 
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-container profile-modal" onClick={(e) => e.stopPropagation()}>
-                {/* Modal Header */}
+            <div className="modal-content profile-modal patient-profile" onClick={(e) => e.stopPropagation()}>
+                {/* Modal Header with Icon */}
                 <div className="modal-header">
-                    <div className="modal-avatar">
-                        {user?.name?.charAt(0).toUpperCase() || 'U'}
-                    </div>
-                    <div className="modal-title-area">
-                        <h2>{user?.name || 'User'}</h2>
-                        <span className="modal-role-badge">{user?.role || 'Patient'}</span>
-                    </div>
+                    <h3>👤 Patient Profile</h3>
                     <button className="modal-close" onClick={onClose}>×</button>
                 </div>
 
                 {/* Modal Body */}
                 <div className="modal-body">
-                    {/* Read-only Info */}
-                    <div className="profile-section">
-                        <h3>Personal Information</h3>
-                        <div className="profile-info-grid">
-                            <div className="profile-info-item">
-                                <span className="profile-label">📧 Email</span>
-                                <span className="profile-value">{user?.email || 'N/A'}</span>
-                            </div>
-                            <div className="profile-info-item">
-                                <span className="profile-label">👤 Role</span>
-                                <span className="profile-value capitalize">{user?.role || 'Patient'}</span>
-                            </div>
-                            <div className="profile-info-item">
-                                <span className="profile-label">📅 Member Since</span>
-                                <span className="profile-value">
-                                    {user?.createdAt
-                                        ? new Date(user.createdAt).toLocaleDateString('en-US', {
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric'
-                                        })
-                                        : 'N/A'}
-                                </span>
-                            </div>
+                    {/* Avatar and Name Section */}
+                    <div className="profile-section centered">
+                        <div className="profile-avatar">
+                            {user?.name?.charAt(0).toUpperCase() || 'U'}
+                        </div>
+                        <div className="profile-name">
+                            <h4>{user?.name || 'User'}</h4>
+                            <span className="profile-role">{user?.role || 'Patient'}</span>
                         </div>
                     </div>
 
-                    {/* Editable Info */}
-                    <div className="profile-section">
-                        <h3>Update Profile</h3>
-                        <form onSubmit={handleSubmit} className="profile-form">
-                            {/* DOB Field */}
-                            <div className="form-group">
-                                <label>🎂 Date of Birth</label>
-                                <div
-                                    className={`dob-input-trigger ${formData.dob ? 'has-value' : ''}`}
-                                    onClick={() => setShowDatePicker(true)}
-                                >
-                                    <span className={formData.dob ? 'dob-value' : 'dob-placeholder'}>
-                                        {formatDisplayDate(formData.dob)}
-                                    </span>
-                                    <span className="dob-icon">📅</span>
-                                </div>
-                            </div>
+                    {/* Profile Details */}
+                    <div className="profile-details">
+                        <div className="detail-row">
+                            <span className="detail-label">📧 Email</span>
+                            <span className="detail-value">{user?.email || 'N/A'}</span>
+                        </div>
 
-                            {/* Mobile Field with Country Code */}
-                            <div className="form-group">
-                                <label>📱 Mobile Number</label>
-                                <div className="mobile-input-group">
-                                    <select
-                                        className="country-code-select"
-                                        value={formData.countryCode}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, countryCode: e.target.value }))}
-                                    >
-                                        {countryCodes.map(cc => (
-                                            <option key={cc.code} value={cc.code}>
-                                                {cc.flag} {cc.code}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <input
-                                        type="tel"
-                                        placeholder="Enter mobile number"
-                                        value={formData.mobile}
-                                        onChange={handleMobileChange}
-                                        maxLength={15}
-                                    />
-                                </div>
-                            </div>
+                        <div className="detail-row">
+                            <span className="detail-label">📅 Member Since</span>
+                            <span className="detail-value">
+                                {user?.createdAt
+                                    ? new Date(user.createdAt).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    })
+                                    : 'N/A'}
+                            </span>
+                        </div>
 
-                            {/* Status Message */}
-                            {saveStatus.message && (
-                                <div className={`save-status ${saveStatus.type}`}>
-                                    {saveStatus.type === 'success' ? '✅' : '⚠️'} {saveStatus.message}
-                                </div>
-                            )}
+                        <div className="detail-row">
+                            <span className="detail-label">🎂 Date of Birth</span>
+                            <span className="detail-value">
+                                {formData.dob
+                                    ? formatDisplayDate(formData.dob)
+                                    : 'Not set'}
+                            </span>
+                        </div>
 
-                            {/* Actions */}
-                            <div className="modal-actions">
-                                <button type="button" className="btn-secondary" onClick={onClose}>
-                                    Cancel
-                                </button>
-                                <button type="submit" className="btn-primary" disabled={saving}>
-                                    {saving ? (
-                                        <>
-                                            <span className="button-spinner"></span>
-                                            Saving...
-                                        </>
-                                    ) : (
-                                        '💾 Save Changes'
-                                    )}
-                                </button>
-                            </div>
-                        </form>
+                        <div className="detail-row">
+                            <span className="detail-label">📱 Mobile</span>
+                            <span className="detail-value">
+                                {user?.mobile || 'Not set'}
+                            </span>
+                        </div>
                     </div>
+
+                    {/* Update Form */}
+                    <form onSubmit={handleSubmit} className="profile-update-form">
+                        <h4 className="form-section-title">✏️ Update Information</h4>
+
+                        {/* DOB Field */}
+                        <div className="form-group">
+                            <label>🎂 Date of Birth</label>
+                            <div
+                                className={`dob-input-trigger ${formData.dob ? 'has-value' : ''}`}
+                                onClick={() => setShowDatePicker(true)}
+                            >
+                                <span className={formData.dob ? 'dob-value' : 'dob-placeholder'}>
+                                    {formatDisplayDate(formData.dob)}
+                                </span>
+                                <span className="dob-icon">📅</span>
+                            </div>
+                        </div>
+
+                        {/* Mobile Field with Country Code */}
+                        <div className="form-group">
+                            <label>📱 Mobile Number</label>
+                            <div className="mobile-input-group">
+                                <select
+                                    className="country-code-select"
+                                    value={formData.countryCode}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, countryCode: e.target.value }))}
+                                >
+                                    {countryCodes.map(cc => (
+                                        <option key={cc.code} value={cc.code}>
+                                            {cc.flag} {cc.code}
+                                        </option>
+                                    ))}
+                                </select>
+                                <input
+                                    type="tel"
+                                    placeholder="Enter mobile number"
+                                    value={formData.mobile}
+                                    onChange={handleMobileChange}
+                                    maxLength={15}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Status Message */}
+                        {saveStatus.message && (
+                            <div className={`save-status ${saveStatus.type}`}>
+                                {saveStatus.type === 'success' ? '✅' : '⚠️'} {saveStatus.message}
+                            </div>
+                        )}
+                    </form>
+                </div>
+
+                {/* Modal Footer with Actions */}
+                <div className="modal-footer">
+                    <button type="button" className="btn-secondary" onClick={onClose}>
+                        Cancel
+                    </button>
+                    <button type="submit" className="btn-primary" onClick={handleSubmit} disabled={saving}>
+                        {saving ? (
+                            <>
+                                <span className="button-spinner"></span>
+                                Saving...
+                            </>
+                        ) : (
+                            '💾 Save Changes'
+                        )}
+                    </button>
                 </div>
 
                 {/* Date Picker Modal */}

@@ -3,6 +3,29 @@ import { useNavigate } from 'react-router-dom';
 import { useDoctorAuth } from '../context/DoctorAuthContext';
 import api from '../utils/api';
 import DoctorProfileModal from '../components/DoctorProfileModal';
+import CreatableSelect from '../components/CreatableSelect';
+
+// Department-specific medication suggestions
+const MEDICATIONS_BY_DEPARTMENT = {
+    'Cardiology': ['Aspirin', 'Atenolol', 'Amlodipine', 'Lisinopril', 'Metoprolol', 'Clopidogrel', 'Warfarin', 'Digoxin', 'Furosemide', 'Ramipril'],
+    'Neurology': ['Gabapentin', 'Pregabalin', 'Levetiracetam', 'Carbamazepine', 'Topiramate', 'Valproate', 'Amitriptyline', 'Sumatriptan', 'Propranolol'],
+    'Orthopedics': ['Ibuprofen', 'Diclofenac', 'Naproxen', 'Celecoxib', 'Calcium + Vitamin D', 'Glucosamine', 'Paracetamol', 'Tramadol', 'Methylprednisolone'],
+    'Dermatology': ['Cetirizine', 'Hydroxyzine', 'Betamethasone', 'Clotrimazole', 'Fluconazole', 'Isotretinoin', 'Mupirocin', 'Tacrolimus', 'Calamine'],
+    'Gastroenterology': ['Omeprazole', 'Pantoprazole', 'Ranitidine', 'Domperidone', 'Ondansetron', 'Metoclopramide', 'Lactulose', 'Rifaximin', 'Mesalamine'],
+    'Pulmonology': ['Salbutamol', 'Budesonide', 'Montelukast', 'Theophylline', 'Azithromycin', 'Amoxicillin', 'Dextromethorphan', 'Acetylcysteine'],
+    'Psychiatry': ['Fluoxetine', 'Sertraline', 'Escitalopram', 'Alprazolam', 'Clonazepam', 'Olanzapine', 'Risperidone', 'Lithium', 'Quetiapine'],
+    'Pediatrics': ['Paracetamol Syrup', 'Ibuprofen Syrup', 'Amoxicillin Syrup', 'Cetirizine Drops', 'Multivitamins', 'ORS', 'Zinc Syrup', 'Domperidone Drops'],
+    'General Medicine': ['Paracetamol', 'Ibuprofen', 'Omeprazole', 'Cetirizine', 'Amoxicillin', 'Azithromycin', 'Metformin', 'Atorvastatin', 'Pantoprazole'],
+    'ENT': ['Amoxicillin', 'Azithromycin', 'Cetirizine', 'Fluticasone Nasal Spray', 'Ofloxacin Ear Drops', 'Chlorhexidine Gargle', 'Montelukast'],
+    'Ophthalmology': ['Moxifloxacin Eye Drops', 'Tobramycin Eye Drops', 'Lubricant Eye Drops', 'Prednisolone Eye Drops', 'Timolol Eye Drops'],
+    'default': ['Paracetamol', 'Ibuprofen', 'Cetirizine', 'Omeprazole', 'Amoxicillin', 'Azithromycin', 'Multivitamins', 'B-Complex']
+};
+
+// Standard dosage options
+const DOSAGE_OPTIONS = ['1-0-0', '0-1-0', '0-0-1', '1-1-0', '1-0-1', '0-1-1', '1-1-1', '1/2-0-1/2', '1/2-1/2-1/2', 'SOS', 'PRN'];
+
+// Standard duration options
+const DURATION_OPTIONS = ['3 Days', '5 Days', '7 Days', '10 Days', '2 Weeks', '15 Days', '3 Weeks', '1 Month', '6 Weeks', '2 Months', '3 Months'];
 
 /**
  * Doctor Dashboard Component
@@ -572,37 +595,51 @@ const DoctorDashboard = () => {
 
                                 <div className="medications-section">
                                     <label>Medications *</label>
+                                    <p className="medications-hint">💡 Select from suggestions or type custom values</p>
                                     {prescription.medications.map((med, index) => (
-                                        <div key={index} className="medication-row">
-                                            <input
-                                                type="text"
-                                                placeholder="Medicine name"
-                                                value={med.name}
-                                                onChange={(e) => updateMedication(index, 'name', e.target.value)}
-                                            />
-                                            <input
-                                                type="text"
-                                                placeholder="Dosage (e.g., 1-0-1)"
-                                                value={med.dosage}
-                                                onChange={(e) => updateMedication(index, 'dosage', e.target.value)}
-                                            />
-                                            <input
-                                                type="text"
-                                                placeholder="Duration"
-                                                value={med.duration}
-                                                onChange={(e) => updateMedication(index, 'duration', e.target.value)}
-                                            />
-                                            <input
-                                                type="text"
-                                                placeholder="Instructions"
-                                                value={med.instructions}
-                                                onChange={(e) => updateMedication(index, 'instructions', e.target.value)}
-                                            />
+                                        <div key={index} className="medication-row smart-inputs">
+                                            <div className="med-field">
+                                                <span className="field-label">💊 Medicine</span>
+                                                <CreatableSelect
+                                                    options={MEDICATIONS_BY_DEPARTMENT[doctor?.specialization] || MEDICATIONS_BY_DEPARTMENT['default']}
+                                                    value={med.name}
+                                                    onChange={(value) => updateMedication(index, 'name', value)}
+                                                    placeholder="Select or type medicine..."
+                                                />
+                                            </div>
+                                            <div className="med-field">
+                                                <span className="field-label">📋 Dosage</span>
+                                                <CreatableSelect
+                                                    options={DOSAGE_OPTIONS}
+                                                    value={med.dosage}
+                                                    onChange={(value) => updateMedication(index, 'dosage', value)}
+                                                    placeholder="e.g., 1-0-1"
+                                                />
+                                            </div>
+                                            <div className="med-field">
+                                                <span className="field-label">⏱️ Duration</span>
+                                                <CreatableSelect
+                                                    options={DURATION_OPTIONS}
+                                                    value={med.duration}
+                                                    onChange={(value) => updateMedication(index, 'duration', value)}
+                                                    placeholder="e.g., 5 Days"
+                                                />
+                                            </div>
+                                            <div className="med-field instructions-field">
+                                                <span className="field-label">📝 Instructions</span>
+                                                <input
+                                                    type="text"
+                                                    placeholder="After food, Before bed..."
+                                                    value={med.instructions}
+                                                    onChange={(e) => updateMedication(index, 'instructions', e.target.value)}
+                                                />
+                                            </div>
                                             {prescription.medications.length > 1 && (
                                                 <button
                                                     type="button"
                                                     className="remove-med-btn"
                                                     onClick={() => removeMedication(index)}
+                                                    title="Remove medication"
                                                 >
                                                     ❌
                                                 </button>

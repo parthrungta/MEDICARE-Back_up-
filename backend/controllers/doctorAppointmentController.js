@@ -1,4 +1,5 @@
 const Appointment = require('../models/Appointment');
+const User = require('../models/User');
 const { asyncHandler } = require('../middleware/errorHandler');
 
 /**
@@ -198,6 +199,30 @@ const completeAppointment = asyncHandler(async (req, res) => {
     };
 
     await appointment.save();
+
+    // SYNC: Update patient's currentMedications
+    if (prescription.medications && prescription.medications.length > 0) {
+        const medicationsToAdd = prescription.medications.map(med => ({
+            name: med.name,
+            dosage: med.dosage || '',
+            duration: med.duration || '',
+            instructions: med.instructions || '',
+            diagnosis: prescription.diagnosis || '',
+            prescribedAt: new Date(),
+            prescribedBy: req.doctor._id,
+            appointmentId: appointment._id
+        }));
+
+        // Add new medications to patient's currentMedications array
+        await User.findByIdAndUpdate(
+            appointment.patient,
+            {
+                $push: {
+                    currentMedications: { $each: medicationsToAdd }
+                }
+            }
+        );
+    }
 
     // Populate patient info for response
     await appointment.populate('patient', 'name email mobile');

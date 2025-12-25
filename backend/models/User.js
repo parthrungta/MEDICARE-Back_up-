@@ -28,12 +28,13 @@ const userSchema = new mongoose.Schema({
         trim: true,
         default: '',
         // Allow empty strings, only validate if provided
+        // Allows optional + prefix for country code
         validate: {
             validator: function (v) {
                 if (!v || v === '') return true;
-                return /^[0-9]{10,15}$/.test(v);
+                return /^\+?[0-9]{10,15}$/.test(v);
             },
-            message: 'Please provide a valid mobile number (10-15 digits)'
+            message: 'Please provide a valid mobile number (10-15 digits, optional + prefix)'
         }
     },
     dob: {
@@ -51,6 +52,40 @@ const userSchema = new mongoose.Schema({
         enum: ['patient', 'doctor', 'admin'],
         default: 'patient'
     },
+    currentMedications: [{
+        name: {
+            type: String,
+            required: true
+        },
+        dosage: {
+            type: String,
+            default: ''
+        },
+        duration: {
+            type: String,
+            default: ''
+        },
+        instructions: {
+            type: String,
+            default: ''
+        },
+        diagnosis: {
+            type: String,
+            default: ''
+        },
+        prescribedAt: {
+            type: Date,
+            default: Date.now
+        },
+        prescribedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Doctor'
+        },
+        appointmentId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Appointment'
+        }
+    }],
     createdAt: {
         type: Date,
         default: Date.now
